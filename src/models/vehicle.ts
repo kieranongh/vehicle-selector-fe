@@ -1,4 +1,4 @@
-const VEHICLES = {
+export const VEHICLES = {
   'ford': {
     'Ranger': ['Raptor', 'Raptor x', 'wildtrak'],
     'Falcon': ['XR6', 'XR6 Turbo', 'XR8'],

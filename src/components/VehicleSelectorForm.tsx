@@ -52,6 +52,7 @@ export const VehicleSelectorForm = () => {
   const [badgeOptions, setBadgeOptions] = React.useState<ISelectOption[]>([badgePlaceHolder])
 
   const [logBookFile, setLogBookFile] = React.useState<File>()
+  const [fileUploadKey, setFileUploadKey] = React.useState<number>(Date.now())
   const [response, setResponse] = React.useState<LogBookResponse>()
   const [error, setError] = React.useState<string>('')
 
@@ -96,6 +97,7 @@ export const VehicleSelectorForm = () => {
     setModel('')
     setBadge('')
     setLogBookFile(undefined)
+    setFileUploadKey(Date.now())
     setError('')
   }
 
@@ -186,6 +188,7 @@ export const VehicleSelectorForm = () => {
           label="Upload logbook"
           onChange={handleFileChange}
           isDisabled={disableUploadAndSubmit}
+          key={fileUploadKey}
         />
         <button
           className="border border-primary border-2 p-2"

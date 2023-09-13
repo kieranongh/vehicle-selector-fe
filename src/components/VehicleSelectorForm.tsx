@@ -4,6 +4,7 @@ import React from 'react'
 import { VEHICLES } from '@/models/vehicle'
 import { capitalise } from '@/util/util'
 import { SelectComponent, ISelectOption } from '@/components/SelectComponent'
+import { FileUploadComponent } from '@/components/FileUploadComponent'
 
 const makePlaceHolder = { label: "Select make", value: '' }
 const modelPlaceHolder = { label: "Select model", value: '' }
@@ -22,10 +23,14 @@ export const VehicleSelectorForm = () => {
   const [make, setMake] = React.useState<string>('')
   const [model, setModel] = React.useState<string>('')
   const [badge, setBadge] = React.useState<string>('')
-  
   const [modelOptions, setModelOptions] = React.useState<ISelectOption[]>([modelPlaceHolder])
   const [badgeOptions, setBadgeOptions] = React.useState<ISelectOption[]>([badgePlaceHolder])
 
+  const [logBookFile, setLogBookFile] = React.useState<File>()
+
+  const disableUploadAndSubmit = !(make && model && badge)
+
+  // Set model options
   React.useEffect(() => {
     const newModelOptions: ISelectOption[] = []
 
@@ -40,6 +45,7 @@ export const VehicleSelectorForm = () => {
     setModelOptions(newModelOptions)
   }, [make])
 
+  // Set badge options
   React.useEffect(() => {
     const newBadgeOptions: ISelectOption[] = []
 
@@ -66,10 +72,17 @@ export const VehicleSelectorForm = () => {
   const handleModelChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setModel(e.target.value)
     setBadge('')
+    setError('')
   }
   const handleBadgeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setBadge(e.target.value)
   }
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setLogBookFile(e.target.files[0]);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -96,12 +109,12 @@ export const VehicleSelectorForm = () => {
           value={badge}
           handleChange={handleBadgeChange}
         />
-      </div>
-      <div>
-        <h4>Selection</h4>
-        <p>Make: {make}</p>
-        <p>Model: {model}</p>
-        <p>Badge: {badge}</p>
+
+        <FileUploadComponent
+          label="Upload logbook"
+          onChange={handleFileChange}
+          isDisabled={disableUploadAndSubmit}
+        />
       </div>
     </div>
   )

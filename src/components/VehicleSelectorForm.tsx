@@ -18,6 +18,31 @@ const makeOptions: ISelectOption[] = [
   }))
 ]
 
+interface Vehicle {
+  make: string,
+  model: string,
+  badge: string,
+}
+
+interface LogBookResponse {
+  make: string,
+  model: string,
+  badge: string,
+  logBook: string,
+}
+
+const PREFILL_JEEP: Vehicle = {
+  'make': 'jeep',
+  'model': 'Wrangler',
+  'badge': 'Rubicon',
+}
+
+const PREFILL_FORD: Vehicle = {
+  'make': 'ford',
+  'model': 'Ranger',
+  'badge': 'Raptor',
+}
+
 
 export const VehicleSelectorForm = () => {
   const [make, setMake] = React.useState<string>('')
@@ -27,6 +52,8 @@ export const VehicleSelectorForm = () => {
   const [badgeOptions, setBadgeOptions] = React.useState<ISelectOption[]>([badgePlaceHolder])
 
   const [logBookFile, setLogBookFile] = React.useState<File>()
+  const [response, setResponse] = React.useState<LogBookResponse>()
+  const [error, setError] = React.useState<string>('')
 
   const disableUploadAndSubmit = !(make && model && badge)
 
@@ -64,7 +91,16 @@ export const VehicleSelectorForm = () => {
     setBadgeOptions(newBadgeOptions)
   }, [make, model])
 
+  const resetForm = () => {
+    setMake('')
+    setModel('')
+    setBadge('')
+    setLogBookFile(undefined)
+    setError('')
+  }
+
   const handleMakeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    resetForm()
     setMake(e.target.value)
     setModel('')
     setBadge('')
@@ -76,13 +112,49 @@ export const VehicleSelectorForm = () => {
   }
   const handleBadgeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setBadge(e.target.value)
+    setError('')
   }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       setLogBookFile(e.target.files[0]);
+      setError('')
     }
   };
+
+  const handlePrefill = (vehicle: Vehicle) => () => {
+    resetForm()
+    setMake(vehicle.make)
+    setModel(vehicle.model)
+    setBadge(vehicle.badge)
+  }
+
+  const handleSubmit = async () => {
+    if (!logBookFile) {
+      setError("Upload a log book file")
+    } else {
+      try {
+        const formData = new FormData()
+
+        formData.append('data', logBookFile)
+        formData.append('make', make)
+        formData.append('model', model)
+        formData.append('badge', badge)
+
+        const res = await fetch('localhost:4000/upload_logbook', {
+          method: 'POST',
+          body: formData,
+        })
+        const data = await res.json() as LogBookResponse
+        setResponse(data)
+      } catch(err) {
+        console.error(err)
+        if(err instanceof Error) {
+          setError(err.message)
+        }
+      }
+    }
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -115,7 +187,40 @@ export const VehicleSelectorForm = () => {
           onChange={handleFileChange}
           isDisabled={disableUploadAndSubmit}
         />
+        <button
+          className="border border-primary border-2 p-2"
+          onClick={handleSubmit}
+        >
+          Submit
+        </button>
+        {error && (
+          <p className="text-red-500">{error}</p>
+        )}
       </div>
+      <div className="mt-8 flex gap-4">
+        <button
+          className="border border-primary border-2 p-2"
+          onClick={handlePrefill(PREFILL_JEEP)}
+        >
+          Prefill Jeep Wrangler Rubicon
+        </button>
+        <button
+          className="border border-primary border-2 p-2"
+          onClick={handlePrefill(PREFILL_FORD)}
+        >
+          Prefill Ford Ranger Raptor
+        </button>
+      </div>
+      {response && (
+        <div>
+          <h4>Response</h4>
+          <p>Make: {response.make}</p>
+          <p>Model: {response.model}</p>
+          <p>Badge: {response.badge}</p>
+          <p>Logbook:</p>
+          <p>{response.logBook}</p>
+        </div>
+      )}
     </div>
   )
 }

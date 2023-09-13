@@ -136,12 +136,12 @@ export const VehicleSelectorForm = () => {
       try {
         const formData = new FormData()
 
-        formData.append('data', logBookFile)
+        formData.append('logBookFile', logBookFile)
         formData.append('make', make)
         formData.append('model', model)
         formData.append('badge', badge)
 
-        const res = await fetch('localhost:4000/upload_logbook', {
+        const res = await fetch('/api', {
           method: 'POST',
           body: formData,
         })
@@ -218,7 +218,7 @@ export const VehicleSelectorForm = () => {
           <p>Model: {response.model}</p>
           <p>Badge: {response.badge}</p>
           <p>Logbook:</p>
-          <p>{response.logBook}</p>
+          <p className="whitespace-pre-wrap">{response.logBook}</p>
         </div>
       )}
     </div>
